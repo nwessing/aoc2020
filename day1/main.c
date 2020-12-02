@@ -88,24 +88,22 @@ void exercise_two(int32_t *inputs, uint32_t count) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 3) {
-    printf("Usage: aocd1 (1|2) input_file_name \n");
-    printf("where (1|2) selects exercise 1 or 2\n");
-    printf("where input_file_name is a file path containing a line separated list of valid 32-bit integers\n");
+  if (argc < 2) {
+    printf("Need an input file!\n");
     return 1;
   }
 
-  char *input_path = argv[2];
+  char *input_path = argv[1];
   uint32_t count;
   int32_t *inputs = read_file(input_path, &count);
 
   qsort(inputs, count, sizeof(inputs[0]), compare);
 
-  if (strcmp(argv[1], "1") == 0) {
-    exercise_one(inputs, count);
-  } else if (strcmp(argv[1], "2") == 0) {
-    exercise_two(inputs, count);
-  }
+  printf("Exercise 1:\n");
+  exercise_one(inputs, count);
+
+  printf("Exercise 2:\n");
+  exercise_two(inputs, count);
 
 
   return 0;
