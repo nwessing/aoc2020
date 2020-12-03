@@ -1,7 +1,8 @@
 #include "assert.h"
+#include "stdint.h"
+#include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
-#include "file.h"
 #include "stdbool.h"
 
 bool is_password_valid_for_policy_a(char *password, int32_t min, int32_t max, char letter) {
@@ -33,21 +34,6 @@ bool is_password_valid_for_policy_b(char *password, int32_t position_1, int32_t 
   return matches == 1;
 }
 
-int32_t parse_number_up_to(char *input, char token, char **found_token_ptr) {
-  char *found_token = strchr(input, token);
-  assert(found_token != NULL);
-
-  uint32_t num_chars = found_token - input;
-
-  uint32_t dest_size = num_chars + 1;
-  char dest[dest_size];
-  memset(dest, '\0', dest_size);
-  strncpy(dest, input, num_chars);
-
-  *found_token_ptr = found_token;
-  return atoi(dest);
-}
-
 int main(int argc, char **argv) {
   if (argc < 2) {
     printf("Need an input file!\n");
@@ -56,44 +42,38 @@ int main(int argc, char **argv) {
 
   uint32_t valid_password_count_policy_a = 0;
   uint32_t valid_password_count_policy_b = 0;
-  char *input = read_file_as_string(argv[1]);
-  char *start = input;
-  while (*start != '\0') {
-    char *new_start;
-    int32_t min_requirement = parse_number_up_to(start, '-', &new_start);
-    start = new_start + 1;
 
-    int32_t max_requirement = parse_number_up_to(start, ' ', &new_start);
-    start = new_start + 1;
+  char *filename = argv[1];
+  FILE *file = fopen(filename, "rb");
+  if (file == NULL) {
+    printf("could not load file %s\n", filename);
+    return 1;
+  }
 
-    char letter = *start;
-    start = strchr(start, ' ');
-    assert(start != NULL);
-    start += 1;
+  uint32_t line_buffer_size = 256;
+  char line_buffer[line_buffer_size];
+  while (fgets(line_buffer, line_buffer_size, file)) {
+    int32_t min_requirement, max_requirement;
+    char letter;
+    uint32_t password_size = 256;
+    char password[password_size];
+    int32_t scan_result = sscanf(line_buffer, "%i-%i %c: %256s\n", &min_requirement, &max_requirement, &letter, password);
+    assert(scan_result == 4);
+    /* printf("%i-%i %c: %s\n", min_requirement, max_requirement, letter, password); */
 
-    char *end_of_line = strchr(start, '\n');
-    assert(end_of_line != NULL);
-
-    uint32_t num_chars = end_of_line - start;
-    uint32_t buffer_size = num_chars + 1;
-    char buffer[buffer_size];
-    memset(buffer, '\0', buffer_size);
-    strncpy(buffer, start, num_chars);
-
-    if (is_password_valid_for_policy_a(buffer, min_requirement, max_requirement, letter)) {
+    if (is_password_valid_for_policy_a(password, min_requirement, max_requirement, letter)) {
       ++valid_password_count_policy_a;
     }
 
-    if (is_password_valid_for_policy_b(buffer, min_requirement, max_requirement, letter)) {
+    if (is_password_valid_for_policy_b(password, min_requirement, max_requirement, letter)) {
       ++valid_password_count_policy_b;
     }
-    /* printf("%i-%i %c: %s\n", min_requirement, max_requirement, letter, buffer); */
-    start = end_of_line + 1;
   }
+
+  fclose(file);
 
   printf("Exercise 1 answer: %i\n", valid_password_count_policy_a);
   printf("Exercise 2 answer: %i\n", valid_password_count_policy_b);
-  free(input);
 
   return 0;
 }
