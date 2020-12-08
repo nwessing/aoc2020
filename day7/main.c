@@ -25,15 +25,6 @@ typedef struct BagSet {
   u32 length;
 } BagSet;
 
-void resize_if_full(void **array, u32 count, u32 *capacity, size_t element_size) {
-  if (count != *capacity) {
-    return;
-  }
-
-  *capacity *= 2;
-  *array = realloc(*array, (*capacity) * element_size);
-}
-
 bool set_contains(BagSet *set, char *bag_name) {
   for (u32 i = 0; i < set->length; ++i) {
     if (strcmp(set->set[i], bag_name) == 0) {
