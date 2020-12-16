@@ -6,17 +6,18 @@
 #include "math.h"
 #include "ctype.h"
 
+#define STB_DS_IMPLEMENTATION
+#include "stb_ds.h"
+
 #define BUFFER_SIZE 1024
 
 typedef struct Address {
-  u64 address;
+  u64 key;
   u64 value;
 } Address;
 
 typedef struct AddressSpace {
   Address *addresses;
-  u32 length;
-  u32 capacity;
 } AddressSpace;
 
 typedef struct Masks {
@@ -54,7 +55,7 @@ Masks parse_mask(char *mask) {
 
 Address *find_address(Address *addresses, u32 length, u64 address) {
   for (u32 i = 0; i < length; ++i) {
-    if (addresses[i].address == address) {
+    if (addresses[i].key == address) {
       return &addresses[i];
     }
   }
@@ -63,16 +64,7 @@ Address *find_address(Address *addresses, u32 length, u64 address) {
 }
 
 void write_value(AddressSpace *space, u64 address, u64 value) {
-  Address *mem_address = find_address(space->addresses, space->length, address);
-  if (mem_address == NULL) {
-    resize_if_full((void**) &space->addresses, space->length, &space->capacity, sizeof(space->addresses[0]));
-    space->addresses[space->length++] = (Address) {
-      .address = address,
-      .value = 0
-    };
-    mem_address = &space->addresses[space->length - 1];
-  }
-  mem_address->value = value;
+  hmput(space->addresses, address, value);
 }
 
 void write_through_decoder(AddressSpace *space, u64 address, u64 value, Masks masks) {
@@ -94,7 +86,7 @@ void write_value_with_mask(AddressSpace *space, u64 address, u64 value, Masks ma
 
 u64 find_sum(AddressSpace *space) {
   u64 result = 0;
-  for (u32 i = 0; i < space->length; ++i) {
+  for (u32 i = 0; i < hmlenu(space->addresses); ++i) {
     result += space->addresses[i].value;
   }
 
@@ -115,14 +107,10 @@ int main(int argc, char **argv) {
   }
 
   AddressSpace space1 = {
-    .capacity = 1024,
-    .length = 0,
-    .addresses = calloc(1024, sizeof(space1.addresses[0]))
+    .addresses = NULL
   };
   AddressSpace space2 = {
-    .capacity = 1024,
-    .length = 0,
-    .addresses = calloc(1024, sizeof(space2.addresses[0]))
+    .addresses = NULL
   };
 
   Masks masks = {0};
