@@ -9,10 +9,134 @@
 #define BUFFER_SIZE 1024
 
 typedef struct Bus {
-  i32 bus_id;
-  i32 after_t;
+  i64 bus_id;
+  i64 after_t;
 } Bus;
 
+
+Bus find_lcm(i64 a, i64 a_offset, i64 b, i64 b_offset) {
+  i64 a_counter = 0;
+  i64 b_counter = 0;
+  /* if (a < b) { */
+  /*   a = a * (b / a); */
+  /* } */
+  /* if (b < a) { */
+  /*   b = b * (a / b); */
+  /* } */
+  /* i64 a_step = step > 0 ? step : a; */
+  /* i64 b_step = step > 0 ? step : b; */
+
+  /* printf("s %lli, a %lli, b %lli\n", step, a_step, b_step); */
+
+  /* i64 step = a > b ? a : b; */
+  i64 first_multiple = 0;
+  while (1) {
+    printf("a %lli, b %lli\n", a_counter, b_counter);
+    /* if ((a_counter - a_offset) % a == 0 && (b_counter - b_offset) % b == 0 && a_counter == b_counter) { */
+    if (a_counter - a_offset == b_counter - b_offset) {
+      /* if (operation) { */
+      /*   return a_counter; */
+      /* } */
+
+      if (first_multiple == 0) {
+        first_multiple = a_counter;
+      } else {
+        return (Bus) {
+          .bus_id = a_counter - first_multiple,
+          .after_t =  first_multiple
+        };
+        /* return a_counter - first_multiple; */
+      }
+    }
+
+    if (a_counter < b_counter) {
+      a_counter += a;
+    } else {
+      b_counter += b;
+    }
+  }
+
+}
+
+
+i64 find_least_common_multiple(Bus *buses, u32 length) {
+  /* u64 *multiples = calloc(length, sizeof(multiples[0])); */
+  /* u64 cur_mul = 0; */
+  /* for (u32 i = 0; i < length; ++i) { */
+  /*   multiples[i] = buses[i].bus_id - buses[i].after_t; */
+  /*   if (multiples[i] > cur_mul) { */
+  /*     cur_mul = multiples[i]; */
+  /*   } */
+  /* } */
+
+  /* i32 step = buses[0].bus_id > buses[1].bus_id ? buses[0].bus_id : buses[1].bus_id; */
+  /* i64 step = 0; */
+
+  i64 result = 1, multiple = 1;
+  for (u32 i = 0; i < length; ++i) {
+    Bus bus = buses[i];
+    while ((result + bus.after_t) % bus.bus_id != 0) {
+      result += multiple;
+    }
+    multiple *= bus.bus_id;
+  }
+  return result;
+
+    /*    let answer2 = { */
+    /*     let mut result = 1; */
+    /*     let mut mode = 1; */
+    /*     for (offset, bus_id) in buses { */
+    /*         while (result + offset as u64) % bus_id != 0 { */
+    /*             result += mode; */
+    /*         } */
+    /*         mode *= bus_id; */
+    /*     } */
+    /*     result */
+    /* }; */
+
+
+  Bus cumulative_bus = buses[0];
+  for (u32 i = 1; i < length; ++i) {
+    printf("mul %lli, t %lli\n", cumulative_bus.bus_id, cumulative_bus.after_t);
+    cumulative_bus = find_lcm(cumulative_bus.bus_id, 0, buses[i].bus_id, buses[i].after_t);
+    assert(i < 2);
+    /* step = find_lcm(buses[i].bus_id, buses[i].after_t, buses[i + 1].bus_id, buses[i + 1].after_t, step, false); */
+
+
+
+    /* while (multiples[i] != multiples[i + 1]) { */
+    /*   if (multiples[i] < multiples[i + 1]) { */
+    /*     multiples[i] += step; */
+    /*   } else { */
+    /*     multiples[i + 1] += step; */
+    /*   } */
+    /* } */
+  }
+  printf("mul %lli, t %lli\n", cumulative_bus.bus_id, cumulative_bus.after_t);
+
+
+
+  /* bool all_equal = false; */
+  /* while (!all_equal) { */
+  /*   all_equal = true; */
+  /*   for (u32 i = 0; i < length; ++i) { */
+  /*     while (multiples[i] < cur_mul) { */
+  /*       multiples[i] += buses[i].bus_id; */
+  /*     } */
+
+  /*     if (multiples[i] != cur_mul) { */
+  /*       all_equal = false; */
+  /*     } */
+
+  /*     if (multiples[i] > cur_mul) { */
+  /*       cur_mul = multiples[i]; */
+  /*     } */
+  /*   } */
+  /* } */
+
+  /* free(multiples); */
+  return cumulative_bus.after_t;
+}
 
 i64 find_base_multiple(Bus *buses, u32 length) {
   Bus longest_gap = {0};
@@ -23,11 +147,7 @@ i64 find_base_multiple(Bus *buses, u32 length) {
     }
   }
 
-
-  /* for (i64 i = longest_gap.bus_id - longest_gap.after_t; 1; i += longest_gap.bus_id) { */
-
-  /* } */
-
+  /* u64 lcm = find_least_common_multiple(buses, length); */
 
   for (i64 i = longest_gap.bus_id - longest_gap.after_t; 1; i += longest_gap.bus_id) {
     bool found = true;
@@ -148,8 +268,13 @@ int main(int argc, char **argv) {
   find_next_bus(buses, length, timestamp, &best_bus_id, &smallest_gap);
   printf("Exercise 1: %i\n", best_bus_id * smallest_gap);
 
-  i32 ex2_timestamp = find_timestamp(buses, length);
-  printf("Exercise 2: %i\n", ex2_timestamp);
+  /* printf("LCM %lli\n", find_lcm(7, 0, 13, 1)); */
+  /* i64 gcf = greatest_common_factor(182664, 154875); */
+  /* printf("GCF: %lli\n", gcf); */
+
+  /* i32 ex2_timestamp = find_timestamp(buses, length); */
+  printf("LCM: %lli\n", find_least_common_multiple(buses, length));
+  /* printf("Exercise 2: %i\n", ex2_timestamp); */
 
   fclose(file);
 
