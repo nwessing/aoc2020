@@ -6,3 +6,11 @@
 ./bin/day6/day6 day6/input.txt
 ./bin/day7/day7 day7/input.txt
 ./bin/day8/day8 day8/input.txt
+./bin/day9/day9 day9/input.txt
+./bin/day10/day10 day10/input.txt
+./bin/day11/day11 day11/input.txt
+./bin/day12/day12 day12/input.txt
+./bin/day13/day13 day13/input.txt
+./bin/day14/day14 day14/input.txt
+./bin/day15/day15 day15/input.txt
+./bin/day16/day16 day16/input.txt

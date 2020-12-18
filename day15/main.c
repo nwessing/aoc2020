@@ -74,6 +74,8 @@ int main(int argc, char **argv) {
   printf("Exercise 1: %i\n", exercise1_answer);
   printf("Exercise 2: %i\n", last_key);
 
+  free(numbers);
+
   fclose(file);
 
   return 0;

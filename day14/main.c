@@ -138,6 +138,8 @@ int main(int argc, char **argv) {
   printf("Exercise 1: %llu\n", find_sum(&space1));
   printf("Exercise 2: %llu\n", find_sum(&space2));
 
+  hmfree(space1.addresses);
+  hmfree(space2.addresses);
   fclose(file);
 
   return 0;
